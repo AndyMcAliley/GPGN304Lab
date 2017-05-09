@@ -19,7 +19,7 @@ ystep  =   25
 mass = 1000 # mass [kg]
 
 # location. Right hand coordinate system. [m]
-xp   =   0
+xp   =   100
 yp   =   0
 zp   =   100
 
@@ -52,17 +52,17 @@ substr = '%.0f kg at (%.0f, %.0f, %.0f)m'%(mass,xp,yp,zp)
 
 plt.figure()
 plt.pcolor(yv,xv,Gv)
-plt.colorbar().set_label('mGal')
-plt.xlabel('y [m]')
-plt.ylabel('x [m]')
-plt.title('Gravity Response of a Point Source (mGal)\n'+substr)
+plt.colorbar().set_label('[mGal]')
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title('Gravity Response of a Point Source [mGal]\n'+substr)
 
 plt.figure()
 plt.pcolor(y,x,Gi)
-plt.colorbar().set_label('mGal')
-plt.xlabel('y [m]')
-plt.ylabel('x [m]')
-plt.title('Gravity Response of a Point Source (mGal)\n'+substr)
+plt.colorbar().set_label('[mGal]')
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title('Gravity Response of a Point Source [mGal]\n'+substr)
 
 
 plt.show()
