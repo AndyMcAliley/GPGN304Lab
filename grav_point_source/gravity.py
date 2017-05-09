@@ -13,20 +13,20 @@ xstep  =   25
 
 ystart = -500
 yend   =  500
-ystep  =   25
+ystep  =  10 
 
 # target parameters
 mass = 1000 # mass [kg]
 
 # location. Right hand coordinate system. [m]
-xp   =   100
-yp   =   0
+xp   =   0 # NORTHING
+yp   =   250   # EASTING
 zp   =   100
 
 
 # make the grid
-x = np.arange(xstart, xend, xstep)
-y = np.arange(ystart, yend, ystep)
+x = np.arange(xstart, xend+xstep, xstep) # NORTHING
+y = np.arange(ystart, yend+ystep, ystep) # EASTING
 z = 0
 
 # helpful parameters
@@ -36,7 +36,8 @@ ny = len(y)
 xv, yv = np.meshgrid(x, y)
 
 # vectorized notation (PREFERRED)
-Gv = conv*gamma*mass*(zp-z)/((xp-xv)**2 + (yp-yv)**2 + (zp-z)**2)**(3./2.)
+Rdist = np.sqrt((xp-xv)**2 + (yp-yv)**2 + (zp-z)**2)
+Gv = conv*gamma*mass*(zp-z)/Rdist**3
 
 # index notation (ACCEPTABLE)
 Gi = np.zeros([ny,nx])
@@ -49,19 +50,21 @@ for ix in range(nx):
 
 # PLOTTING
 substr = '%.0f kg at (%.0f, %.0f, %.0f)m'%(mass,xp,yp,zp)
+cmap = plt.get_cmap('jet')
 
 plt.figure()
-plt.pcolor(yv,xv,Gv)
+plt.pcolor(yv,xv,Gv, cmap=cmap)
 plt.colorbar().set_label('[mGal]')
-plt.xlabel('x [m]')
-plt.ylabel('y [m]')
+plt.xlabel('Easting [m]')
+plt.ylabel('Northing [m]')
 plt.title('Gravity Response of a Point Source [mGal]\n'+substr)
 
+# Transpose Gi to get on same grid as x and y
 plt.figure()
-plt.pcolor(y,x,Gi)
+plt.pcolor(y,x,Gi.transpose(), cmap=cmap)
 plt.colorbar().set_label('[mGal]')
-plt.xlabel('x [m]')
-plt.ylabel('y [m]')
+plt.xlabel('Easting [m]')
+plt.ylabel('Northing [m]')
 plt.title('Gravity Response of a Point Source [mGal]\n'+substr)
 
 

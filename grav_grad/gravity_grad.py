@@ -7,30 +7,26 @@ gamma = 6.67408e-11 # [m^3 kg^-1 s^-2]
 conv  = 100000. # [m/s^2] to [mGal]
 
 # setup grid parameters [m]
-xstart = -500.
-xend   =  500.
-xstep  =  10.
+xstart = -500
+xend   =  500
+xstep  =  25 
 
-ystart = -500.
-yend   =  500.
-ystep  =   10.
+ystart = -500
+yend   =  500
+ystep  =   10
 
 # target parameters
-mass = 10000. # mass [kg]
+mass = 10000 # mass [kg]
 
 # location. Right hand coordinate system. [m]
-xp   =   0.
-yp   =   0.
-zp   =   200.
+xp   =   200 # NORTHING
+yp   =   0 # EASTING
+zp   =   200
 
 # make the grid
-x = np.arange(xstart, xend+xstep, xstep)
-y = np.arange(ystart, yend+ystep, ystep)
-z = 0.
-
-# helpful parameters
-nx = len(x)
-ny = len(y)
+x = np.arange(xstart, xend+xstep, xstep) # NORTHING
+y = np.arange(ystart, yend+ystep, ystep) # EASTING
+z = 0
 
 xv, yv = np.meshgrid(x, y)
 
@@ -59,8 +55,8 @@ f.suptitle('Gravity Gradient of a Point Source [Eotvos]\n'+substr)
 # Plot Gxx
 p = axarr[0,0]
 im = p.pcolor(yv,xv,Gxx, cmap=cmap)
-p.set_ylabel('y [m]')
-p.set_xlabel('x [m]')
+p.set_xlabel('Easting [m]')
+p.set_ylabel('Northing [m]')
 p.set_title('Gxx')
 f.colorbar(im, ax=p).set_label('[Eotvos]')
 
@@ -80,8 +76,8 @@ f.colorbar(im, ax=p).set_label('[Eotvos]')
 p = axarr[1,1]
 im = p.pcolor(yv,xv,Gyy, cmap=cmap)
 p.set_title('Gyy')
-p.set_ylabel('y [m]')
-p.set_xlabel('x [m]')
+p.set_xlabel('Easting [m]')
+p.set_ylabel('Northing [m]')
 f.colorbar(im, ax=p).set_label('[Eotvos]')
 
 # Plot Gyz
@@ -93,16 +89,16 @@ f.colorbar(im, ax=p).set_label('[Eotvos]')
 # Plot G
 p = axarr[2,0]
 im = p.pcolor(yv,xv,Gv, cmap=cmap)
-p.set_ylabel('y [m]')
-p.set_xlabel('x [m]')
+p.set_xlabel('Easting [m]')
+p.set_ylabel('Northing [m]')
 p.set_title('G')
 f.colorbar(im, ax=p).set_label('[mGal]')
 
 # Plot Gzz
 p = axarr[2,2]
 im = p.pcolor(yv,xv,Gzz, cmap=cmap)
-p.set_ylabel('y [m]')
-p.set_xlabel('x [m]')
+p.set_xlabel('Easting [m]')
+p.set_ylabel('Northing [m]')
 p.set_title('Gzz')
 f.colorbar(im, ax=p).set_label('[Eotvos]')
 

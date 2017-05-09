@@ -19,8 +19,8 @@ a = 200 # target radius [m]
 k = 0.05 # target susceptibility
 
 # location. Right hand coordinate system. [m]
-xp   =   200
-yp   =   0
+xp   =   200 # NORTHING
+yp   =   0   # EASTING
 zp   =   250
 
 # Inducing field strength
@@ -79,8 +79,8 @@ cmap = plt.get_cmap('jet')
 plt.figure()
 plt.pcolor(yv,xv,dT, cmap=cmap)
 plt.colorbar().set_label('[nT]')
-plt.xlabel('y [m]')
-plt.ylabel('x [m]')
+plt.xlabel('Easting [m]')
+plt.ylabel('Northing [m]')
 plt.title(' Total Magnetic Field Anomaly [nT]\n'+substr)
 
 
