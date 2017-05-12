@@ -9,11 +9,11 @@ conv  = 100000. # [m/s^2] to [mGal]
 # setup grid parameters [m]
 xstart = -500
 xend   =  500
-xstep  =  25 
+xstep  =  25
 
 ystart = -500
 yend   =  500
-ystep  =   10
+ystep  =  25
 
 # target parameters
 mass = 10000 # mass [kg]
@@ -39,9 +39,9 @@ Gxz = 3*conv*gamma*mass*(xp-xv)*(zp-z ) / (Rdist**5)
 Gxy = 3*conv*gamma*mass*(xp-xv)*(yp-yv) / (Rdist**5)
 Gyz = 3*conv*gamma*mass*(yp-yv)*(zp-z ) / (Rdist**5)
 
-Gxx = 3*conv*gamma*mass*( (xp-xv)**2/(Rdist**5) - 1./Rdist**3)
-Gyy = 3*conv*gamma*mass*( (yp-yv)**2/(Rdist**5) - 1./Rdist**3)
-Gzz = 3*conv*gamma*mass*( (zp-z )**2/(Rdist**5) - 1./Rdist**3)
+Gxx = conv*gamma*mass*( 3*(xp-xv)**2/(Rdist**5) - 1./Rdist**3)
+Gyy = conv*gamma*mass*( 3*(yp-yv)**2/(Rdist**5) - 1./Rdist**3)
+Gzz = conv*gamma*mass*( 3*(zp-z )**2/(Rdist**5) - 1./Rdist**3)
 
 # PLOTTING
 
