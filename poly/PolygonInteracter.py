@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.artist import Artist
 from matplotlib.mlab import dist_point_to_segment
+from gpoly import gpoly
 
 
 class PolygonInteractor(object):
@@ -30,10 +31,15 @@ class PolygonInteractor(object):
     showverts = True
     epsilon = 5  # max pixel distance to count as a vertex hit
 
-    def __init__(self, ax, poly):
+    def __init__(self, model_ax, data_ax, poly, density=1, obs_loc=[], data=[], error=[]):
         if poly.figure is None:
             raise RuntimeError('You must first add the polygon to a figure or canvas before defining the interactor')
-        self.ax = ax
+        self.ax = model_ax
+        self.dax = data_ax
+        self.density = density
+        self.obs_loc = obs_loc
+        self.data = data
+        self.error = error
         canvas = poly.figure.canvas
         self.poly = poly
 
@@ -51,6 +57,10 @@ class PolygonInteractor(object):
         canvas.mpl_connect('button_release_event', self.button_release_callback)
         canvas.mpl_connect('motion_notify_event', self.motion_notify_callback)
         self.canvas = canvas
+        self.compute_grav()
+        self.ax.autoscale()
+        if min(y)>0:
+            self.ax.set_ylim(top=0)
 
     def draw_callback(self, event):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
@@ -98,6 +108,8 @@ class PolygonInteractor(object):
         if event.button != 1:
             return
         self._ind = None
+        self.compute_grav()
+
 
     def key_press_callback(self, event):
         'whenever a key is pressed'
@@ -129,6 +141,7 @@ class PolygonInteractor(object):
                     break
 
         self.canvas.draw()
+        self.compute_grav()
 
     def motion_notify_callback(self, event):
         'on mouse movement'
@@ -153,6 +166,27 @@ class PolygonInteractor(object):
         self.ax.draw_artist(self.poly)
         self.ax.draw_artist(self.line)
         self.canvas.blit(self.ax.bbox)
+
+    def compute_grav(self):
+        grav = gpoly(self.obs_loc,self.poly.xy,self.density)
+        self.dax.clear()
+        self.dax.plot(self.obs_loc,grav,'g-')
+        if self.data != []:
+            if self.error != []:
+                self.dax.errorbar(self.obs_loc,self.data, yerr=self.error,fmt='b-')
+            else:
+                self.dax.plot(self.obs_loc,self.data,'g-')
+
+    def update_data(self,obs_loc,data=[],error=[]):
+        self.obs_loc = obs_loc
+        self.data = data
+        self.error = error
+        self.compute_grav()
+
+    def update_density(self,density):
+        self.density = density
+        self.compute_grav()
+
 
 
 if __name__ == '__main__':

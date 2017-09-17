@@ -44,7 +44,7 @@ def gpoly(obs,nodes,density):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    xmin = -10.
+    xmin = 0.
     xmax = 10.
     nx = 201
 
