@@ -21,12 +21,17 @@ poly = patches.Polygon(list(zip(xs, zs)), animated=True)
 modelSubplot.add_patch(poly)
 
 density = 1
-xobs = np.linspace(0,10,101)
-ndata = len(xobs)
-obs = np.zeros((ndata,2))
-obs[:,0] = xobs
-data = [0.0, 0.1, 0.2, 0.3, 0.35, 0.4, 0.35, 0.3, 0.2, 0.1, 0.0]
-error = np.ones(ndata)*0.01
+xplot = np.linspace(0,10,101)
+nplot = len(xplot)
+obs = np.zeros((nplot,2))
+obs[:,0] = xplot
+xdata = np.linspace(0,10,11)
+gravdata = [0.000, 0.001, 0.002, 0.003, 0.0035, 0.004, 0.0035, 0.003, 0.002, 0.001, 0.000]
+ndata = len(gravdata)
+data = np.zeros((ndata,2))
+data[:,0] = xdata
+data[:,1] = gravdata
+error = np.ones(ndata)*0.0005
 modxmin = min(xs)
 modxmax = max(xs)
 modzmin = min(zs)

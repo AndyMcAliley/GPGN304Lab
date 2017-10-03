@@ -173,9 +173,10 @@ class PolygonInteractor(object):
         self.dax.plot(self.obs_loc,grav,'g-')
         if self.data != []:
             if self.error != []:
-                self.dax.errorbar(self.obs_loc,self.data, yerr=self.error,fmt='b-')
+                self.dax.errorbar(self.data[:,0],self.data[:,1], yerr=self.error,fmt='b-')
             else:
                 self.dax.plot(self.obs_loc,self.data,'g-')
+        self.canvas.draw()
 
     def update_data(self,obs_loc,data=[],error=[]):
         self.obs_loc = obs_loc

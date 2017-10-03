@@ -1,6 +1,7 @@
 # compute gravity response of a polygon
 # Andy McAliley, 9/16/2017
 import numpy as np
+from builtins import range
 
 def gpoly(obs,nodes,density):
     #Blakely, 1996
@@ -8,10 +9,10 @@ def gpoly(obs,nodes,density):
     numobs = len(obs)
     numnodes = len(nodes)
     grav = np.zeros(numobs)
-    for iobs in xrange(0,numobs):
+    for iobs in range(numobs):
         shiftNodes = nodes - obs[iobs]
         sum = 0
-        for i1 in xrange(0,numnodes):
+        for i1 in range(numnodes):
             i2 = i1+1
             # last node must wrap around to first node
             i2 = np.mod(i2,numnodes)
