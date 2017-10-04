@@ -70,11 +70,28 @@ saveModelButton.on_clicked(saveModel)
 def updateDensity(val):
     p.update_density(val)
 fig.text(.55,.6,'Density value (g/cm^3)',fontsize=14, transform=fig.transFigure)
-ax4=plt.axes([.55,.45,.38,.1])
+ax4=plt.axes([.55,.48,.38,.1])
 densSlider = Slider(ax4,'',-3,3,valinit=0)
 densSlider.set_val(density)
 densSlider.on_changed(updateDensity)
 
 
+def updateDepth(val):
+    maxDepth = 10**val
+    # p.update_depth(val)
+fig.text(.55,.41,'Depth value (log scale exponent)',fontsize=14, transform=fig.transFigure)
+ax5=plt.axes([.55,.29,.38,.1])
+depthSlider = Slider(ax5,'',0,4,valinit=1)
+depthSlider.set_val(1)
+depthSlider.on_changed(updateDepth)
+
+def updateXAxis(val):
+    xbuffer = 10**val
+    # p.update_xaxis(val)
+fig.text(.55,.22,'x-axis buffer (log scale exponent)',fontsize=14, transform=fig.transFigure)
+ax6=plt.axes([.55,.10,.38,.1])
+xaxisSlider = Slider(ax6,'',0,4,valinit=1)
+xaxisSlider.set_val(1)
+xaxisSlider.on_changed(updateDepth)
 
 plt.show()
