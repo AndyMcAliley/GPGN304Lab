@@ -177,6 +177,11 @@ class PolygonInteractor(object):
                 self.dax.errorbar(self.data[:,0],self.data[:,1], yerr=self.error,fmt='b-')
             else:
                 self.dax.plot(self.preloc,self.data,'g-')
+            sf = 0.1*max(abs(max(self.data[:,1])), abs(min(self.data[:,1])))
+            ymin = min(self.data[:,1]) - sf
+            ymax = max(self.data[:,1]) + sf
+            self.dax.set_ylim((ymin,ymax))
+            
         self.canvas.draw()
         
 

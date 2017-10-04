@@ -4,6 +4,8 @@ import matplotlib.patches as patches
 from matplotlib.widgets import Button
 from matplotlib.widgets import Slider
 from PolygonInteracter import PolygonInteractor
+import tkinter as tk
+from tkinter import filedialog
 
 fig = plt.figure()
 dataSubplot = fig.add_subplot(2,2,1)
@@ -35,6 +37,7 @@ ndata = len(gravdata)
 data = np.zeros((ndata,2))
 data[:,0] = xdata
 data[:,1] = gravdata
+
 error = np.ones(ndata)*0.0005
 modxmin = min(xs)
 modxmax = max(xs)
@@ -47,34 +50,62 @@ p = PolygonInteractor(modelSubplot, dataSubplot, poly, density, preloc)
 # buttons
 # load data
 def loadData(self):
-    5
-    p.update_data(data,error)
+    #root = tk.Tk()
+    #root.withdraw()
 
+    fn = filedialog.askopenfilename()
+    f = open(fn,'r')
+    lines = f.read().splitlines()
+    f.close()
+
+    ndata = lines[0]
+    dx = []
+    dz = []
+    er = []
+    for line in lines[1::]:
+        row = line.split()
+        dx.append(float(row[0]))
+        dz.append(float(row[1]))
+        er.append(float(row[2]))
+
+    data = np.transpose([dx,dz])
+    error = er
+    p.update_preloc(data)
+    p.update_data(data,error)
 
 ax0=plt.axes([.55,.85,.175,.1])
 loadDataButton=Button(ax0,'Load Data')
 loadDataButton.on_clicked(loadData)
+
 # load model
 def loadModel(self):
     5
+
 ax1=plt.axes([.775,.85,.175,.1])
 loadModelButton=Button(ax1,'Load Model')
 loadModelButton.on_clicked(loadModel)
+
 # new model
 def newPoly(self):
     5
+
 ax2=plt.axes([.55,.7,.175,.1])
-newModelButton=Button(ax2,'New Model')
-newModelButton.on_clicked(newPoly)
+newModelButton=Button(ax2,'Useless Button')
+#newModelButton=Button(ax2,'New Model')
+#newModelButton.on_clicked(newPoly)
+
 # save model
 def saveModel(self):
     5
+
 ax3=plt.axes([.775,.7,.175,.1])
 saveModelButton=Button(ax3,'Save Model')
 saveModelButton.on_clicked(saveModel)
+
 # density value
 def updateDensity(val):
     p.update_density(val)
+
 fig.text(.55,.6,'Density value (g/cm^3)',fontsize=14, transform=fig.transFigure)
 ax4=plt.axes([.55,.48,.38,.1])
 densSlider = Slider(ax4,'',-3,3,valinit=0)
@@ -86,6 +117,7 @@ def updateDepth(val):
     maxDepth = 10**val
     modelSubplot.set_ylim(maxDepth,0)
     # p.update_depth(val)
+
 fig.text(.55,.41,'Depth value (log scale exponent)',fontsize=14, transform=fig.transFigure)
 ax5=plt.axes([.55,.29,.38,.1])
 depthSlider = Slider(ax5,'',0,4,valinit=1)
@@ -110,10 +142,10 @@ def updateXAxis(val):
     modelSubplot.set_xlim((xmin,xmax))
     
 
-fig.text(.55,.22,'x-axis buffer (log scale exponent)',fontsize=14, transform=fig.transFigure)
-ax6=plt.axes([.55,.10,.38,.1])
-xaxisSlider = Slider(ax6,'',0,4,valinit=1)
-xaxisSlider.set_val(1)
-xaxisSlider.on_changed(updateXAxis)
+#fig.text(.55,.22,'x-axis buffer (log scale exponent)',fontsize=14, transform=fig.transFigure)
+#ax6=plt.axes([.55,.10,.38,.1])
+#xaxisSlider = Slider(ax6,'',0,4,valinit=1)
+#xaxisSlider.set_val(1)
+#xaxisSlider.on_changed(updateXAxis)
 
 plt.show()
