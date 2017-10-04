@@ -31,13 +31,14 @@ class PolygonInteractor(object):
     showverts = True
     epsilon = 5  # max pixel distance to count as a vertex hit
 
-    def __init__(self, model_ax, data_ax, poly, density=1, obs_loc=[], data=[], error=[]):
+    def __init__(self, model_ax, data_ax, poly, density=1, preloc=[], data=[], error=[]):
         if poly.figure is None:
             raise RuntimeError('You must first add the polygon to a figure or canvas before defining the interactor')
         self.ax = model_ax
         self.dax = data_ax
         self.density = density
-        self.obs_loc = obs_loc
+        self.preloc = preloc
+        self.opreloc = preloc
         self.data = data
         self.error = error
         canvas = poly.figure.canvas
@@ -168,25 +169,25 @@ class PolygonInteractor(object):
         self.canvas.blit(self.ax.bbox)
 
     def compute_grav(self):
-        grav = gpoly(self.obs_loc,self.poly.xy,self.density)
+        grav = gpoly(self.preloc,self.poly.xy,self.density)
         self.dax.lines = []
-        self.dax.plot(self.obs_loc,grav,'g-')
+        self.dax.plot(self.preloc,grav,'g-')
         if self.data != []:
             if self.error != []:
                 self.dax.errorbar(self.data[:,0],self.data[:,1], yerr=self.error,fmt='b-')
             else:
-                self.dax.plot(self.obs_loc,self.data,'g-')
+                self.dax.plot(self.preloc,self.data,'g-')
         self.canvas.draw()
         
 
     def update_data(self,data=[],error=[]):
-        #self.obs_loc = obs_loc
+        #self.preloc = preloc
         self.data = data
         self.error = error
         self.compute_grav()
         
     def update_preloc(self,preloc):
-        self.obs_loc = preloc
+        self.preloc = preloc
         self.compute_grav()
 
     def update_density(self,density):

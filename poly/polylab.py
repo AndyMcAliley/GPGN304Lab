@@ -49,6 +49,8 @@ p = PolygonInteractor(modelSubplot, dataSubplot, poly, density, preloc)
 def loadData(self):
     5
     p.update_data(data,error)
+
+
 ax0=plt.axes([.55,.85,.175,.1])
 loadDataButton=Button(ax0,'Load Data')
 loadDataButton.on_clicked(loadData)
@@ -92,18 +94,22 @@ depthSlider.on_changed(updateDepth)
 
 def updateXAxis(val):
     xbuffer = 10**val
-    dataSubplot.autoscale()
-    xlim = dataSubplot.get_xlim()
+
+    xlim = (min(p.opreloc[:,0]), max(p.opreloc[:,0]))
     xmin = xlim[0] - xbuffer
     xmax = xlim[1] + xbuffer
-    dataSubplot.set_xlim((xmin,xmax))
-    modelSubplot.set_xlim((xmin,xmax))
-    xpreloc = np.linspace(xmin,xmax,101)
-    npreloc = len(xpreloc)
+    
+    npreloc = int(2*(xmax-xmin))
+    xpreloc = np.linspace(xmin,xmax,npreloc)
     preloc = np.zeros((npreloc,2))
     preloc[:,0] = xpreloc
     p.update_preloc(preloc)
     # p.update_xaxis(val)
+    
+    dataSubplot.set_xlim((xmin,xmax))
+    modelSubplot.set_xlim((xmin,xmax))
+    
+
 fig.text(.55,.22,'x-axis buffer (log scale exponent)',fontsize=14, transform=fig.transFigure)
 ax6=plt.axes([.55,.10,.38,.1])
 xaxisSlider = Slider(ax6,'',0,4,valinit=1)
