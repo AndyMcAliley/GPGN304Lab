@@ -58,7 +58,7 @@ class PolygonInteractor(object):
         canvas.mpl_connect('motion_notify_event', self.motion_notify_callback)
         self.canvas = canvas
         self.compute_grav()
-        self.ax.autoscale()
+        # self.ax.autoscale()
         if min(y)>0:
             self.ax.set_ylim(top=0)
 
@@ -185,6 +185,9 @@ class PolygonInteractor(object):
         self.error = error
         self.compute_grav()
         
+    def update_preloc(self,preloc):
+        self.obs_loc = preloc
+        self.compute_grav()
 
     def update_density(self,density):
         self.density = density
