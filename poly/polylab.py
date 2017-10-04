@@ -58,7 +58,7 @@ def loadData(self):
     lines = f.read().splitlines()
     f.close()
 
-    ndata = lines[0]
+    ndata = int(lines[0])
     dx = []
     dz = []
     er = []
@@ -79,24 +79,56 @@ loadDataButton.on_clicked(loadData)
 
 # load model
 def loadModel(self):
-    5
+    fn = filedialog.askopenfilename()
+    f = open(fn,'r')
+    lines = f.read().splitlines()
+    f.close()
+
+    np = int(lines[0].split()[0])
+    den = float(lines[0].split()[1])
+    xp = []
+    zp = []
+    for line in lines[1::]:
+        row = line.split()
+        xp.append(float(row[0]))
+        zp.append(float(row[1]))
+
+    rpoly = patches.Polygon(list(zip(xp, zp)), animated=True)
+    
+    p.reset_poly(rpoly, den)
+    
 
 ax1=plt.axes([.775,.85,.175,.1])
 loadModelButton=Button(ax1,'Load Model')
 loadModelButton.on_clicked(loadModel)
 
 # new model
-def newPoly(self):
-    5
+def resetPoly(self):
+    xs = [2.,3.,3.,2.]
+    zs = [3.,3.,4.,4.]
+    rpoly = patches.Polygon(list(zip(xs, zs)), animated=True)
+    
+    p.reset_poly(rpoly)
+
 
 ax2=plt.axes([.55,.7,.175,.1])
 newModelButton=Button(ax2,'Useless Button')
 #newModelButton=Button(ax2,'New Model')
-#newModelButton.on_clicked(newPoly)
+newModelButton.on_clicked(resetPoly)
 
 # save model
 def saveModel(self):
-    5
+    fn = filedialog.asksaveasfilename()
+    f = open(fn,'w')
+    n = len(p.poly.xy)-1
+    f.write("%d %.2f\n"%(n,p.density))
+    print(p.poly.xy)
+    for ii in range(0,n+1):
+        line = p.poly.xy[ii]
+        print(line)
+        
+    f.close()
+
 
 ax3=plt.axes([.775,.7,.175,.1])
 saveModelButton=Button(ax3,'Save Model')

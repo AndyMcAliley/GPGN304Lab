@@ -63,6 +63,17 @@ class PolygonInteractor(object):
         if min(y)>0:
             self.ax.set_ylim(top=0)
 
+    def reset_poly(self, poly, density=1):
+        self.density = density
+        
+        self.poly.xy = poly.xy
+        x, y = zip(*self.poly.xy)        
+        self.line = Line2D(x, y, marker='o', markerfacecolor='r', animated=True)
+        self.ax.add_line(self.line)
+        self.ax.autoscale(axis='y')
+        self.compute_grav()
+
+
     def draw_callback(self, event):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
         self.ax.draw_artist(self.poly)
