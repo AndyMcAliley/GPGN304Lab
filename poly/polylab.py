@@ -7,8 +7,11 @@ from PolygonInteracter import PolygonInteractor
 
 fig = plt.figure()
 dataSubplot = fig.add_subplot(2,2,1)
+dataSubplot.set_ylabel("G_z [mGals]")
 modelSubplot = fig.add_subplot(2,2,3,sharex=dataSubplot)
 modelSubplot.invert_yaxis()
+modelSubplot.set_ylabel("Depth [m]")
+modelSubplot.set_xlabel("x distance [m]")
 # p = newPoly()
 
 #theta = np.arange(0, 2*np.pi, 2.0)
@@ -44,7 +47,7 @@ p = PolygonInteractor(modelSubplot, dataSubplot, poly, density, obs)
 # load data
 def loadData(self):
     5
-    p.update_data(obs,data,error)
+    p.update_data(data,error)
 ax0=plt.axes([.55,.85,.175,.1])
 loadDataButton=Button(ax0,'Load Data')
 loadDataButton.on_clicked(loadData)

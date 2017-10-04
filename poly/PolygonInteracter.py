@@ -169,7 +169,7 @@ class PolygonInteractor(object):
 
     def compute_grav(self):
         grav = gpoly(self.obs_loc,self.poly.xy,self.density)
-        self.dax.clear()
+        self.dax.lines = []
         self.dax.plot(self.obs_loc,grav,'g-')
         if self.data != []:
             if self.error != []:
@@ -177,12 +177,14 @@ class PolygonInteractor(object):
             else:
                 self.dax.plot(self.obs_loc,self.data,'g-')
         self.canvas.draw()
+        
 
-    def update_data(self,obs_loc,data=[],error=[]):
-        self.obs_loc = obs_loc
+    def update_data(self,data=[],error=[]):
+        #self.obs_loc = obs_loc
         self.data = data
         self.error = error
         self.compute_grav()
+        
 
     def update_density(self,density):
         self.density = density
