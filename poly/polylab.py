@@ -124,9 +124,9 @@ def saveModel(self):
     f.write("%d %.2f\n"%(n,p.density))
     print(p.poly.xy)
     for ii in range(0,n+1):
-        line = p.poly.xy[ii]
-        print(line)
-        
+        xl = p.poly.xy[ii][0]
+        zl = p.poly.xy[ii][1]
+        f.write("%.3f %.3f\n"%(xl,zl)) 
     f.close()
 
 
