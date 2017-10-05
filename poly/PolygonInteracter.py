@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.artist import Artist
 from matplotlib.mlab import dist_point_to_segment
+from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
 from gpoly import gpoly
 
 
@@ -44,6 +45,13 @@ class PolygonInteractor(object):
         canvas = poly.figure.canvas
         self.poly = poly
 
+        at = AnchoredText(r'$\Delta\rho = $' + "%.2f"%(self.density),
+                  prop=dict(size=12), frameon=True,
+                  loc=1,
+                  )
+        self.at = at
+        self.dax.add_artist(at)
+        
         x, y = zip(*self.poly.xy)
         self.line = Line2D(x, y, marker='o', markerfacecolor='r', animated=True)
         self.ax.add_line(self.line)
@@ -182,7 +190,18 @@ class PolygonInteractor(object):
     def compute_grav(self):
         grav = gpoly(self.preloc,self.poly.xy,self.density)
         self.dax.lines = []
+        self.dax.text = []
+        self.at.remove()
+
         self.dax.plot(self.preloc,grav,'g-')
+        at = AnchoredText(r'$\Delta\rho = $' + "%.2f"%(self.density),
+                  prop=dict(size=12), frameon=True,
+                  loc=1,
+                  )
+        self.at = at
+        self.dax.add_artist(at)
+
+
         if self.data != []:
             if self.error != []:
                 self.dax.errorbar(self.data[:,0],self.data[:,1], yerr=self.error,fmt='b-')

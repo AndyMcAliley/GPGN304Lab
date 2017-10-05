@@ -1,4 +1,5 @@
 import numpy as np
+from math import *
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.widgets import Button
@@ -84,7 +85,7 @@ def loadModel(self):
     lines = f.read().splitlines()
     f.close()
 
-    np = int(lines[0].split()[0])
+    np =    int(lines[0].split()[0])
     den = float(lines[0].split()[1])
     xp = []
     zp = []
@@ -96,6 +97,11 @@ def loadModel(self):
     rpoly = patches.Polygon(list(zip(xp, zp)), animated=True)
     
     p.reset_poly(rpoly, den)
+    densSlider.set_val(p.density)
+    ymax, ymin = p.ax.get_ylim()
+    ymax = log10(ymax)
+    depthSlider.set_val(ymax)
+    
     
 
 ax1=plt.axes([.775,.85,.175,.1])
@@ -109,6 +115,9 @@ def resetPoly(self):
     rpoly = patches.Polygon(list(zip(xs, zs)), animated=True)
     
     p.reset_poly(rpoly)
+    ymax, ymin = p.ax.get_ylim()
+    ymax = log10(ymax)
+    depthSlider.set_val(ymax)
 
 
 ax2=plt.axes([.55,.7,.175,.1])
