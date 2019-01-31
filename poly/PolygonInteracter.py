@@ -227,7 +227,7 @@ class PolygonInteractor(object):
         #print(self.preloc[0:,1].shape, grav.shape)
         #self.dax.plot(self.preloc.T[0],grav,'g-')
         ### self.preloc is a (101,2) array, 101 rows by 2 colums. We want just the first column: the x values.
-        self.dax.plot(self.preloc[:,0:1],grav,'g-')
+        self.dax.plot(self.preloc[:,0],grav,'g-')
         
         at = AnchoredText(r'$\Delta\rho = $' + "%.2f"%(self.density),
                   prop=dict(size=12), frameon=True,

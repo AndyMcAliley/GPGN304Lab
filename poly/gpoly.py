@@ -11,7 +11,7 @@ def gpoly(obs,nodes,density):
     grav = np.zeros(numobs)
     for iobs in range(numobs):
         shiftNodes = nodes - obs[iobs]
-        su = 0
+        sum = 0
         for i1 in range(numnodes):
             i2 = i1+1
             # last node must wrap around to first node
@@ -39,8 +39,8 @@ def gpoly(obs,nodes,density):
             term1 = np.log(r2/r1)
             term2 = alpha*(theta2-theta1)
             factor = beta/(1+alpha**2)
-            su = su + factor*(term1-term2)
-        grav[iobs] = 2*gamma*density*su
+            sum = sum + factor*(term1-term2)
+        grav[iobs] = 2*gamma*density*sum
     return grav
 
 if __name__ == '__main__':
