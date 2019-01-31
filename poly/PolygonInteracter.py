@@ -1,15 +1,50 @@
 """
+Edited January 31, 2019
+Edits made by Brett Bernstein
+
+1. matplotlib.axes_grid.anchored_artists is deprecated. Changed to matplotlib.offsetbox for importing AnchoredText
+2. Implemented dist_point_to_segment function, import is deprecated
+3. Removed the damn line. In the compute_grav() function, grav was being plotted not only as a function of the self.preloc
+   x values (which we want), but also as a function of the self.preloc y values. Sliced self.preloc in the plot function so 
+   only the first column, the x values, are used.
+"""
+
+
+
+"""
 This is an example to show how to build cross-GUI applications using
 matplotlib event handling to interact with objects on the canvas
 
 http://matplotlib.org/2.0.0/examples/event_handling/poly_editor.html
-
 """
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.artist import Artist
-from matplotlib.mlab import dist_point_to_segment
+#from matplotlib.mlab import dist_point_to_segment 
+from matplotlib.offsetbox import AnchoredText # https://github.com/ioam/holoviews/commit/0a8974ab1dcd88cf0900059c7148a943d4dccb01
+from gpoly import gpoly
 
+########## NEW ##########
+def dist_point_to_segment(P,S0,S1):
+    """
+    The original function from matplotlib.mlab is deprecated, to be removed.
+    matplotlib docs linked algorithm: http://geomalgorithms.com/a02-_lines.html
+    """
+    d = lambda u,v: np.linalg.norm(u-v)
+    v = S1 - S0
+    w = P - S0
+    print("hi")
+    c1 = np.dot(w,v)
+    if c1 <= 0:
+         return d(P, S0)
+    
+    c2 = np.dot(v,v)
+    if c2 <= c1:
+         return d(P, S1)
+
+    b = c1 / c2;
+    Pb = S0 + b * v
+    return d(P, Pb)
 
 class PolygonInteractor(object):
     """
@@ -30,13 +65,25 @@ class PolygonInteractor(object):
     showverts = True
     epsilon = 5  # max pixel distance to count as a vertex hit
 
-    def __init__(self, ax, poly):
+    def __init__(self, model_ax, data_ax, poly, density=1, preloc=[], data=[], error=[]):
         if poly.figure is None:
             raise RuntimeError('You must first add the polygon to a figure or canvas before defining the interactor')
-        self.ax = ax
+        self.ax = model_ax
+        self.dax = data_ax
+        self.density = density
+        self.preloc = preloc
+        self.opreloc = preloc
+        self.data = data
+        self.error = error
         canvas = poly.figure.canvas
         self.poly = poly
-
+        at = AnchoredText(r'$\Delta\rho = $' + "%.2f"%(self.density),
+                  prop=dict(size=12), frameon=True,
+                  loc=1,
+                  )
+        self.at = at
+        self.dax.add_artist(at)
+        
         x, y = zip(*self.poly.xy)
         self.line = Line2D(x, y, marker='o', markerfacecolor='r', animated=True)
         self.ax.add_line(self.line)
@@ -51,6 +98,21 @@ class PolygonInteractor(object):
         canvas.mpl_connect('button_release_event', self.button_release_callback)
         canvas.mpl_connect('motion_notify_event', self.motion_notify_callback)
         self.canvas = canvas
+        self.compute_grav()
+        # self.ax.autoscale()
+        if min(y)>0:
+            self.ax.set_ylim(top=0)
+
+    def reset_poly(self, poly, density=1):
+        self.density = density
+        
+        self.poly.xy = poly.xy
+        x, y = zip(*self.poly.xy)
+        self.line = Line2D(x, y, marker="o", markerfacecolor='r', animated=True)
+        self.ax.add_line(self.line)
+        self.ax.autoscale(axis='y')
+        self.compute_grav()
+
 
     def draw_callback(self, event):
         self.background = self.canvas.copy_from_bbox(self.ax.bbox)
@@ -78,7 +140,7 @@ class PolygonInteractor(object):
 
         if d[ind] >= self.epsilon:
             ind = None
-
+        #print(ind)
         return ind
 
     def button_press_callback(self, event):
@@ -98,6 +160,8 @@ class PolygonInteractor(object):
         if event.button != 1:
             return
         self._ind = None
+        self.compute_grav()
+
 
     def key_press_callback(self, event):
         'whenever a key is pressed'
@@ -129,6 +193,7 @@ class PolygonInteractor(object):
                     break
 
         self.canvas.draw()
+        self.compute_grav()
 
     def motion_notify_callback(self, event):
         'on mouse movement'
@@ -153,6 +218,53 @@ class PolygonInteractor(object):
         self.ax.draw_artist(self.poly)
         self.ax.draw_artist(self.line)
         self.canvas.blit(self.ax.bbox)
+
+    def compute_grav(self):
+        grav = gpoly(self.preloc,self.poly.xy,self.density)
+        self.dax.lines = []
+        self.dax.text = []
+        self.at.remove()
+        #print(self.preloc[0:,1].shape, grav.shape)
+        #self.dax.plot(self.preloc.T[0],grav,'g-')
+        ### self.preloc is a (101,2) array, 101 rows by 2 colums. We want just the first column: the x values.
+        self.dax.plot(self.preloc[:,0],grav,'g-')
+        
+        at = AnchoredText(r'$\Delta\rho = $' + "%.2f"%(self.density),
+                  prop=dict(size=12), frameon=True,
+                  loc=1,
+                  )
+        self.at = at
+        self.dax.add_artist(at)
+
+
+        if self.data != []:
+            if self.error != []:
+                self.dax.errorbar(self.data[:,0],self.data[:,1], yerr=self.error,fmt='b-')
+            else:
+                self.dax.plot(self.preloc,self.data,'g-')
+            sf = 0.1*max(abs(max(self.data[:,1])), abs(min(self.data[:,1])))
+            #print(sf)
+            ymin = min(self.data[:,1]) - sf
+            ymax = max(self.data[:,1]) + sf
+            self.dax.set_ylim((ymin,ymax))
+            
+        self.canvas.draw()
+        
+
+    def update_data(self,data=[],error=[]):
+        #self.preloc = preloc
+        self.data = data
+        self.error = error
+        self.compute_grav()
+        
+    def update_preloc(self,preloc):
+        self.preloc = preloc
+        self.compute_grav()
+
+    def update_density(self,density):
+        self.density = density
+        self.compute_grav()
+
 
 
 if __name__ == '__main__':

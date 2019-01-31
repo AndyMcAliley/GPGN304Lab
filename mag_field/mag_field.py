@@ -72,6 +72,11 @@ Ba = mu0*a**3/3 * np.dot(M, T.transpose())
 # Transpose to match the meshgrid
 dT = np.dot(Ba, Bhat).transpose()
 
+print(Ba.shape)
+print(T.shape)
+print(M.shape)
+print(dT.shape)
+
 # PLOTTING
 substr = 'radius=%.0f m k=%.0f at (%.0f, %.0f, %.0f)m'%(a,k,xp,yp,zp)
 cmap = plt.get_cmap('jet')

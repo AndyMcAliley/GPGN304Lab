@@ -1,136 +1,208 @@
+"""
+Edited January 31, 2019
+Edits made by Brett Bernstein
+
+**********Make sure matplotlib and cv2 are installed and updated on all machines running this code**********
+
+1. Encountered recursive error on startup. Had to change the matplotlib backend to 'TkAgg' in order to support Tkinter. 
+   ***IMPORTANT*** Order matters: 1.import matplotlib 2.matplotlib.use("TkAgg") 3.import matplotlib.pyplot as plt
+2. Still related to the recursive error, matplotlib and cv2 like to fight. Import cv2 and set useopencl to false (see below).
+"""
+
 import numpy as np
-import matplotlib.pyplot as plt
+from math import *
 import matplotlib.patches as patches
 from matplotlib.widgets import Button
+from matplotlib.widgets import Slider
 from PolygonInteracter import PolygonInteractor
-
-class DraggablePoint:
-    lock = None #only one can be animated at a time
-    def __init__(self, point):
-        self.point = point
-        self.press = None
-        self.background = None
-
-    def connect(self):
-        'connect to all the events we need'
-        self.cidpress = self.point.figure.canvas.mpl_connect('button_press_event', self.on_press)
-        self.cidrelease = self.point.figure.canvas.mpl_connect('button_release_event', self.on_release)
-        self.cidmotion = self.point.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
-
-    def on_press(self, event):
-        if event.inaxes != self.point.axes: return
-        if DraggablePoint.lock is not None: return
-        contains, attrd = self.point.contains(event)
-        if not contains: return
-        self.press = (self.point.center), event.xdata, event.ydata
-        DraggablePoint.lock = self
-
-        # draw everything but the selected rectangle and store the pixel buffer
-        canvas = self.point.figure.canvas
-        axes = self.point.axes
-        self.point.set_animated(True)
-        canvas.draw()
-        self.background = canvas.copy_from_bbox(self.point.axes.bbox)
-
-        # now redraw just the rectangle
-        axes.draw_artist(self.point)
-
-        # and blit just the redrawn area
-        canvas.blit(axes.bbox)
-
-    def on_motion(self, event):
-        if DraggablePoint.lock is not self:
-            return
-        if event.inaxes != self.point.axes: return
-        self.point.center, xpress, ypress = self.press
-        dx = event.xdata - xpress
-        dy = event.ydata - ypress
-        self.point.center = (self.point.center[0]+dx, self.point.center[1]+dy)
-
-        canvas = self.point.figure.canvas
-        axes = self.point.axes
-        # restore the background region
-        canvas.restore_region(self.background)
-
-        # redraw just the current rectangle
-        axes.draw_artist(self.point)
-
-        # blit just the redrawn area
-        canvas.blit(axes.bbox)
-
-    def on_release(self, event):
-        'on release we reset the press data'
-        if DraggablePoint.lock is not self:
-            return
-
-        self.press = None
-        DraggablePoint.lock = None
-
-        # turn off the rect animation property and reset the background
-        self.point.set_animated(False)
-        self.background = None
-
-        # redraw the full figure
-        self.point.figure.canvas.draw()
-
-    def disconnect(self):
-        'disconnect all the stored connection ids'
-        self.point.figure.canvas.mpl_disconnect(self.cidpress)
-        self.point.figure.canvas.mpl_disconnect(self.cidrelease)
-        self.point.figure.canvas.mpl_disconnect(self.cidmotion)
+import tkinter as tk
+from tkinter import filedialog
+import matplotlib # https://stackoverflow.com/questions/32019556/matplotlib-crashing-tkinter-application
+matplotlib.use("TkAgg") 
+import matplotlib.pyplot as plt
+import cv2
+cv2.ocl.setUseOpenCL(False) #https://stackoverflow.com/questions/38921595/conflicting-opencv-and-matplotlib#comment65227470_38921595
 
 fig = plt.figure()
 dataSubplot = fig.add_subplot(2,2,1)
-modelSubplot = fig.add_subplot(2,2,3)
+dataSubplot.set_ylabel("G_z [mGals]")
+modelSubplot = fig.add_subplot(2,2,3,sharex=dataSubplot)
+modelSubplot.invert_yaxis()
+modelSubplot.set_ylabel("Depth [m]")
+modelSubplot.set_xlabel("x distance [m]")
+# p = newPoly()
 
-'''
-drs = []
-circles = [patches.Circle((0.3, 0.4), 0.03, fc='r', alpha=0.5),
-               patches.Circle((0.5,0.2), 0.03, fc='g', alpha=0.5),
-               patches.Circle((0.2,0.1), 0.03, fc='b', alpha=0.5),
-               patches.Circle((0.6,0.4), 0.03, fc='y', alpha=0.5),]
-
-for circ in circles:
-    modelSubplot.add_patch(circ)
-    dr = DraggablePoint(circ)
-    dr.connect()
-    drs.append(dr)
-'''
-    
-theta = np.arange(0, 2*np.pi, 2.0)
-r = 0.2
-
-xs = r*np.cos(theta)+0.25
-ys = r*np.sin(theta)+0.25
-poly = patches.Polygon(list(zip(xs, ys)), animated=True)
+#theta = np.arange(0, 2*np.pi, 2.0)
+#r = 0.2
+#xs = r*np.cos(theta)+0.25
+#zs = r*np.sin(theta)+0.25
+xs = [2.,3.,3.,2.]
+zs = [3.,3.,4.,4.]
+poly = patches.Polygon(list(zip(xs, zs)), animated=True)
 modelSubplot.add_patch(poly)
-p = PolygonInteractor(modelSubplot, poly)
+modelSubplot.set_ylim(10,0)
+
+density = 1
+xpreloc = np.linspace(0,10,101)
+npreloc = len(xpreloc)
+preloc = np.zeros((npreloc,2))
+preloc[:,0] = xpreloc
+xdata = np.linspace(0,10,11)
+gravdata = [0.000, 0.001, 0.002, 0.003, 0.0035, 0.004, 0.0035, 0.003, 0.002, 0.001, 0.000]
+ndata = len(gravdata)
+data = np.zeros((ndata,2))
+data[:,0] = xdata
+data[:,1] = gravdata
+
+error = np.ones(ndata)*0.0005
+modxmin = min(xs)
+modxmax = max(xs)
+modzmin = min(zs)
+modzmax = max(zs)
+
+# p = PolygonInteractor(modelSubplot, dataSubplot, poly, density, preloc, data, error)
+p = PolygonInteractor(modelSubplot, dataSubplot, poly, density, preloc)
 
 # buttons
 # load data
 def loadData(self):
-    5
+    #root = tk.Tk()
+    #root.withdraw()
+
+    fn = filedialog.askopenfilename()
+    f = open(fn,'r')
+    lines = f.read().splitlines()
+    f.close()
+
+    ndata = int(lines[0])
+    dx = []
+    dz = []
+    er = []
+    for line in lines[1::]:
+        row = line.split()
+        dx.append(float(row[0]))
+        dz.append(float(row[1]))
+        er.append(float(row[2]))
+
+    data = np.transpose([dx,dz])
+    #print(er)
+    error = er
+    p.update_preloc(data)
+    p.update_data(data,error)
+
 ax0=plt.axes([.55,.85,.175,.1])
 loadDataButton=Button(ax0,'Load Data')
 loadDataButton.on_clicked(loadData)
+
 # load model
 def loadModel(self):
-    5
+    fn = filedialog.askopenfilename()
+    f = open(fn,'r')
+    lines = f.read().splitlines()
+    f.close()
+
+    np =    int(lines[0].split()[0])
+    den = float(lines[0].split()[1])
+    xp = []
+    zp = []
+    for line in lines[1::]:
+        row = line.split()
+        xp.append(float(row[0]))
+        zp.append(float(row[1]))
+
+    rpoly = patches.Polygon(list(zip(xp, zp)), animated=True)
+    
+    p.reset_poly(rpoly, den)
+    densSlider.set_val(p.density)
+    ymax, ymin = p.ax.get_ylim()
+    ymax = log10(ymax)
+    depthSlider.set_val(ymax)
+    
+    
+
 ax1=plt.axes([.775,.85,.175,.1])
 loadModelButton=Button(ax1,'Load Model')
 loadModelButton.on_clicked(loadModel)
+
 # new model
-def newPoly(self):
-    5
+def resetPoly(self):
+    xs = [2.,3.,3.,2.]
+    zs = [3.,3.,4.,4.]
+    rpoly = patches.Polygon(list(zip(xs, zs)), animated=True)
+    
+    p.reset_poly(rpoly)
+    ymax, ymin = p.ax.get_ylim()
+    ymax = log10(ymax)
+    depthSlider.set_val(ymax)
+
+
 ax2=plt.axes([.55,.7,.175,.1])
-clearModelButton=Button(ax2,'Clear Model')
-clearModelButton.on_clicked(newPoly)
+newModelButton=Button(ax2,'Useless Button')
+#newModelButton=Button(ax2,'New Model')
+newModelButton.on_clicked(resetPoly)
+
 # save model
 def saveModel(self):
-    5
+    fn = filedialog.asksaveasfilename()
+    f = open(fn,'w')
+    n = len(p.poly.xy)-1
+    f.write("%d %.2f\n"%(n,p.density))
+    #print(p.poly.xy)
+    for ii in range(0,n+1):
+        xl = p.poly.xy[ii][0]
+        zl = p.poly.xy[ii][1]
+        f.write("%.3f %.3f\n"%(xl,zl)) 
+    f.close()
+
+
 ax3=plt.axes([.775,.7,.175,.1])
 saveModelButton=Button(ax3,'Save Model')
 saveModelButton.on_clicked(saveModel)
-# add vertex
+
+# density value
+def updateDensity(val):
+    p.update_density(val)
+
+fig.text(.55,.6,'Density value (g/cm^3)',fontsize=14, transform=fig.transFigure)
+ax4=plt.axes([.55,.48,.38,.1])
+densSlider = Slider(ax4,'',-3,3,valinit=0)
+densSlider.set_val(density)
+densSlider.on_changed(updateDensity)
+
+
+def updateDepth(val):
+    maxDepth = 10**val
+    modelSubplot.set_ylim(maxDepth,0)
+    # p.update_depth(val)
+
+fig.text(.55,.41,'Depth value (log scale exponent)',fontsize=14, transform=fig.transFigure)
+ax5=plt.axes([.55,.29,.38,.1])
+depthSlider = Slider(ax5,'',0,4,valinit=1)
+depthSlider.set_val(1)
+depthSlider.on_changed(updateDepth)
+
+def updateXAxis(val):
+    xbuffer = 10**val
+
+    xlim = (min(p.opreloc[:,0]), max(p.opreloc[:,0]))
+    xmin = xlim[0] - xbuffer
+    xmax = xlim[1] + xbuffer
+    
+    npreloc = int(2*(xmax-xmin))
+    xpreloc = np.linspace(xmin,xmax,npreloc)
+    preloc = np.zeros((npreloc,2))
+    preloc[:,0] = xpreloc
+    p.update_preloc(preloc)
+    # p.update_xaxis(val)
+    
+    dataSubplot.set_xlim((xmin,xmax))
+    modelSubplot.set_xlim((xmin,xmax))
+    
+
+#fig.text(.55,.22,'x-axis buffer (log scale exponent)',fontsize=14, transform=fig.transFigure)
+#ax6=plt.axes([.55,.10,.38,.1])
+#xaxisSlider = Slider(ax6,'',0,4,valinit=1)
+#xaxisSlider.set_val(1)
+#xaxisSlider.on_changed(updateXAxis)
 
 plt.show()
