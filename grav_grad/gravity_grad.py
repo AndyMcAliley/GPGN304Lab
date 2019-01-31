@@ -47,8 +47,8 @@ Gzz = conv*gamma*mass*( 3*(zp-z )**2/(Rdist**5) - 1./Rdist**3)
 
 f, axarr = plt.subplots(3,3, sharex=True, sharey=True)
 cmap = plt.get_cmap('jet')
-f.delaxes(axarr[1,0])
-f.delaxes(axarr[2,1])
+f.delaxes(axarr[1,0]) # this plot shouldn't exist (Gyx)
+f.delaxes(axarr[2,1]) # This plot shouldn't exist (Gzy)
 substr = '%.0f kg at (%.0f, %.0f, %.0f)m'%(mass,xp,yp,zp)
 f.suptitle('Gravity Gradient of a Point Source [Eotvos]\n'+substr)
 
@@ -86,12 +86,12 @@ im = p.pcolor(yv,xv,Gyz, cmap=cmap)
 p.set_title('Gyz')
 f.colorbar(im, ax=p).set_label('[Eotvos]')
 
-# Plot G
+# Plot Gz
 p = axarr[2,0]
 im = p.pcolor(yv,xv,Gv, cmap=cmap)
 p.set_xlabel('Easting [m]')
 p.set_ylabel('Northing [m]')
-p.set_title('G')
+p.set_title('Gz')
 f.colorbar(im, ax=p).set_label('[mGal]')
 
 # Plot Gzz
