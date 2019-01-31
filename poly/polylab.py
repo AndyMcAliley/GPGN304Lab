@@ -1,12 +1,27 @@
+"""
+Edited January 31, 2019
+Edits made by Brett Bernstein
+
+**********Make sure matplotlib and cv2 are installed and updated on all machines running this code**********
+
+1. Encountered recursive error on startup. Had to change the matplotlib backend to 'TkAgg' in order to support Tkinter. 
+   ***IMPORTANT*** Order matters: 1.import matplotlib 2.matplotlib.use("TkAgg") 3.import matplotlib.pyplot as plt
+2. Still related to the recursive error, matplotlib and cv2 like to fight. Import cv2 and set useopencl to false (see below).
+"""
+
 import numpy as np
 from math import *
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.widgets import Button
 from matplotlib.widgets import Slider
 from PolygonInteracter import PolygonInteractor
 import tkinter as tk
 from tkinter import filedialog
+import matplotlib # https://stackoverflow.com/questions/32019556/matplotlib-crashing-tkinter-application
+matplotlib.use("TkAgg") 
+import matplotlib.pyplot as plt
+import cv2
+cv2.ocl.setUseOpenCL(False) #https://stackoverflow.com/questions/38921595/conflicting-opencv-and-matplotlib#comment65227470_38921595
 
 fig = plt.figure()
 dataSubplot = fig.add_subplot(2,2,1)
@@ -70,6 +85,7 @@ def loadData(self):
         er.append(float(row[2]))
 
     data = np.transpose([dx,dz])
+    #print(er)
     error = er
     p.update_preloc(data)
     p.update_data(data,error)
@@ -131,7 +147,7 @@ def saveModel(self):
     f = open(fn,'w')
     n = len(p.poly.xy)-1
     f.write("%d %.2f\n"%(n,p.density))
-    print(p.poly.xy)
+    #print(p.poly.xy)
     for ii in range(0,n+1):
         xl = p.poly.xy[ii][0]
         zl = p.poly.xy[ii][1]
